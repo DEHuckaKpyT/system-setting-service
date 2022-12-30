@@ -7,7 +7,9 @@ import com.example.services.SystemSettingService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.util.*
 import org.mapstruct.factory.Mappers
 
 
@@ -40,11 +42,15 @@ fun Route.systemSettingRouting() {
         }
 
         get("/get") {
-
+            call.parameters.getOrFail("key")
+                .let { systemSettingService.getValue(it) }
+                .let { call.respond(mapOf("value" to it)) }
         }
 
         get("/get/batch") {
-
+            call.parameters.getOrFail<Set<String>>("keys")
+                .let { systemSettingService.getValues(it) }
+                .let { call.respond(it) }
         }
     }
 }
